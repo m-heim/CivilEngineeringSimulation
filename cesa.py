@@ -1,4 +1,5 @@
 import random
+import sys
 
 
 class Transport():
@@ -61,9 +62,15 @@ def main():
 
 if __name__ == '__main__':
     main()
+    results: list[tuple] = []
     transport: list[Transport]
-    with open('futuristic.csv', 'r') as f:
-        Transport.transport_methods = [Transport(*line.split(','))
-                                       for line in f.read().split('\n') if line[0] != '#']
-    print(Transport.transport_methods)
-    print("DISTANCE, CO2, MORALE:", *simulate(1000, 55, 1))
+    for design in [[5, 'current'], [2, 'doable'], [1, 'futuristic']]:
+        with open(design[1] + '.csv', 'r') as f:
+            Transport.transport_methods = [Transport(*line.split(','))
+                                           for line in f.read().split('\n') if line[0] != '#']
+        print(
+            f'when using {design} we can achieve the following statistics over a span of {int(sys.argv[2]) / 55} years with {sys.argv[1]} people:')
+        simulation = simulate(int(sys.argv[1]), int(sys.argv[2]), float(design[0]))
+        results.append(simulation)
+        print("DISTANCE, CO2, MORALE:", *simulation)
+    print(f'the co2 savings of the corresponding models are:\n C->F {100 * (1 - results[2][1] / results[0][1])} %\n C->D {100 * (1 - results[1][1] / results[0][1])} %\n D->F {100 * (1 - results[2][1] / results[1][1])} %')
